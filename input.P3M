@@ -1,0 +1,31 @@
+0
+20
+511
+0.0
+0.72
+0.25
+0.97
+0.8
+-1
+2000.0
+2048
+1000
+200.0
+/Users/Suman/backup/research/concentration/halo_find/halo_2048/z0
+/Users/Suman/backup/research/camb/M000_transfer.dat
+
+// **** input file for code *****
+// case: what you want to do? 0: FOF MF; 1: SO MF; 2: FOF+SO MF; 3: c-M only (SO MF done by default!); 4: FOF+S//O MF +c-M relation
+// number of mass bins 
+// number of files from halo finder= # of procs halo finder is run
+// redshift
+//hubble
+// omega_m
+// ns
+// sigma8
+// w0
+// box size (Mpc/h)
+// number of particles in the simulation
+// minimum number of particles in the haloa
+// Delta overdensity used to run SO halo finder
+// base halo file name
