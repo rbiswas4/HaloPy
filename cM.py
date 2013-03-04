@@ -1,9 +1,9 @@
 from  numpy import *
 from scipy  import *
 from scipy.optimize import curve_fit
-from params import *
-from pylab import *
 
+profnum=20
+rhoc= 2.77536627e11; #Msun.h^2/Mpc^3
 
 def lognfw (x,N,c):
    if c > 1.0 and c < 15.0 and N > 0.5 and N < 2:
@@ -44,15 +44,19 @@ def get_bin_cmean(a, a2, a2_err, bin_edges, massbins):
       count.append(len(a_range))
    return array(mean_a2), array(mean_a2err), array(mean_a), array(count), array(var_a)
 
-def conc_each_halo_lessmem(mass, r200, halofileroot, filenum, minmassSO):
+def conc_each_halo_lessmem(mass, r200, halofileroot, sodprofile,filenum, minmassSO, cts_col, radius_col, overden_col):
    conc, concerr, norm, MSO=[], [], [], []
    counter=0
    iter=0
    for i in range (0,filenum):
-         infile= halofileroot+".sodprofile."+str(i)
-         radius, overden, cts= [], [], []     
-         for line in open(infile,'r'):
-             data = line.split(' ')
+      infile= halofileroot+"."+sodprofile+"."+str(i)
+      radius, overden, cts= [], [], []    
+      with open(infile,"r") as f:
+        for line in f: 
+          if not line.lstrip().startswith('#'):
+             data = line.split()
+             #print data,data[cts_col], data[radius_col], data[overden_col]
+             #exit()
              radius.append(float(data[radius_col]))
              overden.append(float(data[overden_col]))
              cts.append(int(data[cts_col]))
@@ -73,6 +77,9 @@ def conc_each_halo_lessmem(mass, r200, halofileroot, filenum, minmassSO):
                   MSO.append(mass[iter])
                radius, overden, cts= [], [], []
                iter=iter+1 
+               #r1,q1=modf(float(iter)/100)
+               #if r1==0 : print iter,' fitting halos done'
+               
    return array(conc), array(concerr), array(norm), array(MSO)
 
 def readhaloprof(halofileroot, filenum, profnum):
@@ -87,7 +94,6 @@ def readhaloprof(halofileroot, filenum, profnum):
            radius.append(float(data[radius_col]))
            overden.append(float(data[overden_col]))
            cts.append(int(data[cts_col]))
-           
                 
    return array(radius), array(overden), array(cts)
 

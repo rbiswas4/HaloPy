@@ -1,27 +1,35 @@
 from numpy import *
 from sys import *
 from scipy import *
-from params import *
 
 def read_input_params (infile):
-   inputparams= tuple(open(infile,"r"))
-   return inputparams
-  #
+   inputparams= []
+   with open(infile,"r") as f:
+     for line in f:
+       if not line.lstrip().startswith('#'):
+          inputparams.append(line)
+   return array(inputparams)
   
-def readhalofiles(halofileroot, filenum):
-   FOFcount= []
-   SOcount=  []
+def readheaders(halofileroot,  properties, coltype):
+     infile= halofileroot+"."+properties+".0"
+     with open(infile,"r") as f:
+       for line in f:
+         if line.lstrip().startswith('#') and (line.find('halo_count') > 0 or line.find('sod_halo_bin')>0):
+            hdr= line.split()
+            return hdr.index(coltype)-1 
+     
+def readhalofiles(halofileroot, properties, count_col, filenum):
+   count= []
    for i in range (0,filenum):
-      infile= halofileroot+".sodproperties."+str(i)
-      for line in open(infile,'r'):
-           data = line.split(' ')
-           #print data
-           #exit()
-           FOFcount.append(int(data[fofcount_col]))
-           SOcount.append(int(data[socount_col]))              
-   FOFcount = array(FOFcount)
-   SOcount = array(SOcount)
-   return FOFcount, SOcount
+      infile= halofileroot+"."+properties+"."+str(i)
+      with open(infile,"r") as f:
+        for line in f:
+           if not line.lstrip().startswith('#'):
+                 data = line.split()
+                 #print data,data[count_col]
+                 #exit()
+                 count.append(int(data[count_col]))              
+   return array(count)
 
 def get_bin_mean(a,bin_edges, massbins):
    mean_mass= []
@@ -49,8 +57,10 @@ def MF_fit(x, z):
   a1= 0.788/(1+z)**0.01
   p= 0.807
   q= 1.795
-  delc=1.686
-  return A*(2*a1/pi)**0.5*exp(-a1*delc**2/2/x**2)*(1+(x**2/a1/delc**2)**p)*(delc/x)**q
+  if z==0: delc=1.674
+  if z==1: delc=1.684
+  if z==2: delc= 1.686
+  return A*(2/pi)**0.5*exp(-a1*delc**2/2/x**2)*(1+(x**2/a1/delc**2)**p)*(delc/x*a1**0.5)**q
 
 def calc_mf(b_start, b_end, massbins, mass):
     bins, binsize= logrange(b_start, b_end, massbins) 

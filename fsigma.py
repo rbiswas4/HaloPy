@@ -2,7 +2,8 @@ from numpy import *
 from sys import *
 from scipy import *
 from scipy.integrate import *
-from params import *
+
+rhoc= 2.77536627e11; #Msun.h^2/Mpc^3
 
 def read_Tk(fileTk):
    k=[]
