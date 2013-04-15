@@ -58,8 +58,10 @@ def MF_fit(x, z):
   p= 0.807
   q= 1.795
   if z==0: delc=1.674
-  if z==1: delc=1.684
-  if z==2: delc= 1.686
+  elif z==1: delc=1.684
+  elif z==2: delc= 1.686
+  else: delc= 1.684
+
   return A*(2/pi)**0.5*exp(-a1*delc**2/2/x**2)*(1+(x**2/a1/delc**2)**p)*(delc/x*a1**0.5)**q
 
 def calc_mf(b_start, b_end, massbins, mass):

@@ -3,6 +3,8 @@ from MF import *
 from cM import *
 from fsigma import *
 from growth_ode import *
+from createcMdb import *
+
 import time
 
 rhoc= 2.77536627e11; #Msun.h^2/Mpc^3
@@ -24,8 +26,9 @@ boxsize= float(inputparams[9])
 particlenum= int(inputparams[10])
 minparticle= int(inputparams[11])
 Delta= float(inputparams[12])
-halofileroot= inputparams[13].rstrip()
-Tkfile= inputparams[14].rstrip()
+fileroot= inputparams[13].rstrip()
+halofile= inputparams[14].rstrip()
+Tkfile= inputparams[15].rstrip()
 
 massres= Omegam*rhoc*(boxsize/particlenum)**3 #Msun/h
 simvol= (boxsize)**3 #Mpc^3/h^3
@@ -39,7 +42,8 @@ print "D(z) and log D/log z(z)= ", Ds, lDs, 'at z= ',zseek
 print "time takes= ",time.time()-tin
 print "\n################## FOF MF ##########################################\n"
 if case == 0 or case == 2 or case==4:
-        fofproperties= inputparams[15].rstrip()
+        fofproperties= inputparams[16].rstrip()
+        halofileroot=fileroot+'/'+halofile
         fofcount_col= readheaders(halofileroot, fofproperties,'fof_halo_count')
         FOFcount= readhalofiles(halofileroot, fofproperties, fofcount_col,filenum)
         
@@ -50,7 +54,7 @@ if case == 0 or case == 2 or case==4:
         print "minFOF maxFOF"
         print "# particles= ",min(FOFcount), max(FOFcount)
 	print "mass Msun/h= ", '%le %le' %(FOFbinstart, FOFbinend)
-        file= open(halofileroot+'.fof_mf','w')
+        file= open(halofile+'.fof_mf','w')
         print >>file, "# FOF Mass Msun/h, # clusters, dn/dln M (h/Mpc)^3, frac err, 1/sigma(M), f(sigma), fsigma_fit \n"
         meanmass, hist, binsize, bin_edges= calc_mf(FOFbinstart, FOFbinend, massbins, FOFmass)
         for i in range(0,massbins-1):  
@@ -60,9 +64,10 @@ if case == 0 or case == 2 or case==4:
            if hist[i] >0:  print >> file, '%le %5d %7.4le %7.4lf %7.4lf %7.4lf %7.4lf' %(meanmass[i], hist[i], hist[i]/binsize/simvol,1/hist[i]**0.5, 1/sigmaM, hist[i]/binsize/simvol*meanmass[i]/(-rhoc*Omegam*logsigmaM), MF_fit(sigmaM, zseek))
 	file.close()
 print "\n##################### SO MF ########################################\n"
-if case >= 1 and case<=4:
+if case >= 1 and case<=5:
         tin= time.time()
-        sodproperties= inputparams[16].rstrip()
+        sodproperties= inputparams[17].rstrip()
+        halofileroot=fileroot+'/'+halofile
         socount_col= readheaders(halofileroot, sodproperties,'sod_halo_count')
         SOcount= readhalofiles(halofileroot, sodproperties, socount_col, filenum)   
 	print "\ntotal # of SO clusters= ",len(SOcount)
@@ -73,7 +78,7 @@ if case >= 1 and case<=4:
 	print "minSO maxSO"
         print "# particles= ",min(SOcount), max(SOcount)
 	print "mass Msun/h= ", '%le %le' %(SObinstart, SObinend)
-        file= open(halofileroot+'.sod_mf','w')
+        file= open(halofile+'.sod_mf','w')
         print>> file, "# SO Mass Msun/h # clusters dn/dln M (h/Mpc)^3 frac err 1/sigma(M) f(sigma)\n"
         meanmass, hist, binsize, bin_edges= calc_mf(SObinstart, SObinend, massbins, SOmass)
         for i in range(0,massbins-1):
@@ -86,16 +91,25 @@ if case >= 1 and case<=4:
 print "\n####################### c-M relation #################################\n"
 if case >= 3:
         tin= time.time()      
-        sodprofile= inputparams[17].rstrip()
+        sodprofile= inputparams[18].rstrip()
+        halofileroot=fileroot+'/'+halofile
 	cts_col= readheaders(halofileroot, sodprofile,'sod_halo_bin_count')
 	radius_col= readheaders(halofileroot, sodprofile,'sod_halo_bin_radius')
         overden_col= readheaders(halofileroot, sodprofile,'sod_halo_bin_rho_ratio')        
         print "\ndoing c-M calculation now.."
         conc, concerr, norm, massSO= conc_each_halo_lessmem(SOmass, SOradius, halofileroot, sodprofile, filenum, SObinstart, cts_col, radius_col, overden_col)
         cmean, cmeanerr, meanmass, count, variance= get_bin_cmean(massSO, conc, concerr, bin_edges, massbins)
-	file= open(halofileroot+'.cM','w')
+	file= open(halofile+'.cM','w')
         print>>file, "# SO Mass Msun/h, # clusters, cmean, frac err, variance\n"
         for i in range(0,massbins-1):  
-            if count[i] > 2:  print>>file, '%le %5d %3.4lf %3.4lf %3.4lf' %(meanmass[i], count[i],cmean[i], (cmeanerr[i]**2+cmean[i]**2/count[i])**0.5, (variance[i]/cmean[i]**2-1.0)**0.5)
+            if count[i] > 2:  print >>file, '%le %5d %3.4lf %3.4lf %3.4lf' %(meanmass[i], count[i],cmean[i], (cmeanerr[i]**2+cmean[i]**2/count[i])**0.5, (variance[i]/cmean[i]**2-1.0)**0.5)
         file.close()
 	print "time takes= ",time.time()-tin
+print "\n ######################### create mysql db########################\n"
+
+if case == 5:
+   createcMdb('conc',massSO, conc, zseek)
+  
+    
+
+

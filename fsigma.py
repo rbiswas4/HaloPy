@@ -11,7 +11,7 @@ def read_Tk(fileTk):
    for line in open(fileTk,'r'):
      data = line.split( )
      k.append(float(data[0]))
-     Tk.append(float(data[6]))
+     Tk.append(float(data[4])) #6
    k=array(k)
    Tk=array(Tk)
    return k,Tk

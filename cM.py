@@ -4,6 +4,8 @@ from scipy.optimize import curve_fit
 
 profnum=20
 rhoc= 2.77536627e11; #Msun.h^2/Mpc^3
+rmin=0.1 # minimum radius of the halo profile for the c-M fit
+rmax= 1.8 # max radius
 
 def lognfw (x,N,c):
    if c > 1.0 and c < 15.0 and N > 0.5 and N < 2:
@@ -57,16 +59,23 @@ def conc_each_halo_lessmem(mass, r200, halofileroot, sodprofile,filenum, minmass
              data = line.split()
              #print data,data[cts_col], data[radius_col], data[overden_col]
              #exit()
-             radius.append(float(data[radius_col]))
-             overden.append(float(data[overden_col]))
-             cts.append(int(data[cts_col]))
+             if float(data[radius_col])/r200[iter] > rmin and float(data[radius_col])/r200[iter]  < rmax:
+                radius.append(float(data[radius_col]))
+                overden.append(float(data[overden_col]))
+                cts.append(int(data[cts_col]))
              counter= counter+1
-             r,q=modf(float(counter)/float(profnum))
-             if r==0:
+             remainder,q=modf(float(counter)/float(profnum))
+             if remainder==0:
                if mass[iter]> minmassSO:
                   Delta= array(overden)*rhoc*(4./3.*pi*(array(radius))**3)/mass[iter]
+                  r=radius/r200[iter]
                   #yerr=cumsum(cts[0:profnum])**(-0.5)
-                  r=radius/r200[iter]   
+                  #print radius/r200[iter]
+                  #for i=0
+                  #if radius/r200[iter] > 0.1:
+                  
+                  #   print r
+                  #exit()                          
                   #print r, Delta
                   #if iter>2: exit()
                   N0, c0=1.0, 5.0
