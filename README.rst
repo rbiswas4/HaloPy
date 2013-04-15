@@ -1,9 +1,7 @@
-=========
 HaloPy 
-
 ==========
-Author: Suman bhattacharya
 
+Author: Suman bhattacharya
 =========
 
 HaloPy is a package  built using Python that calculates the calculates the concentration- mass relation, the mass function and its universality (i.e. fsigma vs 1/sigma), given a halo output from the numerical simulations.
@@ -12,12 +10,10 @@ HaloPy is a package  built using Python that calculates the calculates the conce
 HaloPy is released under the MIT software liscense (see LISCENSE).
 
 Prerequisites
-
 =============
 Python, SciPy, NumPy
 
 Description
-
 =============
 The code assumes two sets of files- halo properties files which contain the integrated information (e.g. total particle in a halo) and halo profile file which contain the profile information of each halo as a function of radius of each halo.
 
